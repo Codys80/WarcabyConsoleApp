@@ -2,7 +2,8 @@ namespace WarcabyConsoleApp
 {
     internal class Program
     {   //i=x j=y map[x,y]
-        static int[,] map = new int[8, 8];
+        static string systemMessage = "Rozpoczyna siê gra!";
+        static int[,] map = new int[9, 9];
         static bool gameEnd = false;
         //
         static int tura = 1;
@@ -27,68 +28,94 @@ namespace WarcabyConsoleApp
                     if (x == 1 && (y % 2 == 0)) { map[x, y] = 2; playerTwoPieces++; }
                 }
             }
-
         }
         static void capturePiece()
         {
-            Console.WriteLine("Bicie!");
-            //7-2
-            //map[piece[0], piece[1]] = 0;
-            //map[move[0], move[1]] = playerTurn;
-            //map[move[0], move[1]] = 0;
-
             if (move[1] == piece[1] + 1) // ruch w prawo
             {
                 if (playerTurn == 1)
                 {
-                    map[move[0] - 1, move[1] + 1] = 0; // -/+?
-                    map[move[0] - 2, move[1] + 2] = 1;
-                    Console.WriteLine("p1 w prawo!");
-                    Console.WriteLine("KORDY: " + (move[0] - 2)+ " " + (move[1] + 2) );
-                    playerTwoPieces--;
+                    if (map[move[0] - 1, move[1] + 1] != 0) { systemMessage = "Bicie nie mo¿liwe P1 P"; displayMap(); }
+                    else
+                    {
+                        map[piece[0] , piece[1]] = 0;
+                        map[move[0], move[1]] = 0;
+                        map[move[0] - 1, move[1] + 1] = playerTurn;
+                        playerTwoPieces--;
+                        playerTurn = 2;
+                        tura++;
+                    }
                 }
                 else if (playerTurn == 2)
                 {
-                    map[move[0] + 1, move[1] + 1] = 0;
-                    playerOnePieces--;
+                    if (map[move[0] + 1, move[1] - 1] != 0) { systemMessage = "Bicie nie mo¿liwe P2 P"; displayMap(); }
+                    else
+                    {
+                        map[piece[0], piece[1]] = 0;
+                        map[move[0], move[1]] = 0;
+                        map[move[0] + 1, move[1] - 1] = playerTurn;
+                        playerOnePieces--;
+                        playerTurn = 1;
+                        tura++;
+                    }
                 }
             }
             else if (move[1] == piece[1] - 1) // ruch w lewo
             {
                 if (playerTurn == 1)
                 {
-                    Console.WriteLine("p1 w lewo!");
-                    map[move[0] - 1, move[1] - 1] = 0;
-                    playerTwoPieces--;
+                    if (map[move[0] - 1, move[1] + 1] != 0) { systemMessage = "Bicie nie mo¿liwe P1 L"; displayMap(); }
+                    else
+                    {
+                        map[piece[0], piece[1]] = 0;
+                        map[move[0] - 1, move[1] - 1] = 0;
+                        map[move[0], move[1]] = 0;
+                        map[move[0] - 1, move[1] + 1] = playerTurn;
+                        playerTwoPieces--;
+                        playerTurn = 2;
+                        tura++;
+                    }
                 }
                 else if (playerTurn == 2)
                 {
-                    map[move[0] + 1, move[1] - 1] = 0;
-                    playerOnePieces--;
+                    if (map[move[0] + 1, move[1] - 1] != 0) { systemMessage = "Bicie nie mo¿liwe P2 L"; displayMap(); }
+                    else
+                    {
+                        map[piece[0], piece[1]] = 0;
+                        map[move[0], move[1]] = 0;
+                        map[move[0] + 1, move[1] - 1] = playerTurn;
+                        playerOnePieces--;
+                        playerTurn = 1;
+                        tura++;
+                    }
                 }
             }
         }
         static void moveCheck()
         {
             bool validMove = false;
-            while (!validMove)
-            {
-            move[0] = Convert.ToInt32(Console.ReadLine());
-            move[1] = Convert.ToInt32(Console.ReadLine());
-            
+            //while (!validMove)
+            //{
+                for(int i = 0; i<2; i++)
+                {
+                    ConsoleKeyInfo UserInput = Console.ReadKey();
+                    if (char.IsDigit(UserInput.KeyChar))
+                    {
+                        move[i] = int.Parse(UserInput.KeyChar.ToString()); // use Parse if it's a Digit
+                        Console.Write(" ");
+                    }
+                    else
+                    {
+                        move[0] = 0;  // Else we assign a default value
+                    }
+                }
+                Console.WriteLine(string.Empty);
                 switch (playerTurn)
             {
                 case 1:
-
-                        //Console.WriteLine(move[0] == piece[0] + 1);
-                        //Console.WriteLine(move[0] == piece[0] - 1);
-                        //Console.WriteLine(piece[1] == move[1] + 1);
-                        //Console.WriteLine(move[1]);
-                        
                     if ( (move[1] == piece[1] + 1 || move[1] == piece[1] - 1) && (piece[0] == move[0] + 1) )
                     {
-                            //validMove = true;
-                        if (map[move[0], move[1]] == playerTurn) { validMove = false; Console.WriteLine("Nieprawid³owy ruch, jest tam twój pionek, wprowadŸ ponownie: "); break; }
+                        if (map[move[0], move[1]] == playerTurn) { validMove = false; systemMessage = "Nieprawid³owy ruch, jest tam twój pionek, wprowadŸ ponownie"; displayMap();  break; }
                         if ((map[move[0], move[1]]) == 0)
                         {
                             validMove = true;
@@ -102,7 +129,7 @@ namespace WarcabyConsoleApp
                     }
                     else
                     {
-                        Console.WriteLine("Nieprawid³owy ruch, wprowadŸ ponownie: ");
+                        systemMessage = "Nieprawid³owy ruch, wprowadŸ ponownie";
                         break;
                     }
                     break;
@@ -110,7 +137,7 @@ namespace WarcabyConsoleApp
                     if ((move[1] == piece[1] + 1 || move[1] == piece[1] - 1) && piece[0] == move[0] - 1)
                     {
                         
-                        if (map[move[0], move[1]] == playerTurn) { validMove = false; Console.WriteLine("Nieprawid³owy ruch, jest tam twój pionek, wprowadŸ ponownie: "); break; }
+                        if (map[move[0], move[1]] == playerTurn) { validMove = false; systemMessage = "Nieprawid³owy ruch, wprowadŸ ponownie"; displayMap();  break; }
                         if ((map[move[0], move[1]]) == 0)
                         {
                             validMove = true;
@@ -124,12 +151,12 @@ namespace WarcabyConsoleApp
                     }
                     else
                     {
-                        Console.WriteLine("Nieprawid³owy ruch, wprowadŸ ponownie: ");
+                            systemMessage = "Nieprawid³owy ruch, wprowadŸ ponownie"; displayMap(); 
                         break;
                     }
                     break;
                 }
-            }
+            //}
         }
         static void movePiece()
         {
@@ -139,11 +166,16 @@ namespace WarcabyConsoleApp
             piece[1] = 0;
             move[0] = 0;
             move[1] = 0;
+            if (playerTurn == 1) playerTurn = 2; else playerTurn = 1;
+            tura++;
         }
         static void displayMap()
         {
-            //Console.Clear();
+            Console.Clear();
+            Console.WriteLine('\n'+"||SYSTEM INFO: " + systemMessage + " ||" + '\n');
+            //systemMessage = string.Empty;
             Console.Write("   ");
+            
             for (int y = 0; y < 8; y++)
             {
                 Console.Write(" "+y +"  ");
@@ -164,23 +196,34 @@ namespace WarcabyConsoleApp
                 }
                 Console.WriteLine(string.Empty);
             }
+            //Console.WriteLine("Pozycja wybranego pionka: "+piece[0]+ " " + piece[1]);
+            Console.WriteLine("Pionki gracza 1: " + playerOnePieces);
+            Console.WriteLine("Pionki gracza 2: " + playerTwoPieces);
+            Console.WriteLine("Tura gracza: " + playerTurn + " || Numer tury: " + tura);
+            Console.Write("WprowadŸ wspó³rzêdne pionka: ");
         }
         static void gameProcess()
         {
-            Console.WriteLine("Tura gracza: " + playerTurn + " || Numer tury: " + tura);
-            Console.Write("WprowadŸ wspó³rzêdne pionka: ");
-            //piece[0] = Console.Read().parseInt();
-            //piece[1] = Console.Read().parseInt();
+
             bool validPiece = false;
-            //piece[0] = Convert.ToInt32(Console.ReadLine());
-            //piece[1] = Convert.ToInt32(Console.ReadLine());
-            //if ( map[piece[0], piece[1]] == playerTurn && (map[piece[0] + 1, piece[1]] != playerTurn || map[piece[0] - 1, piece[1]]  != playerTurn) ) validPiece = true;
             while (!validPiece)
             {
-                piece[0] = Convert.ToInt32(Console.ReadLine());
-                piece[1] = Convert.ToInt32(Console.ReadLine());
+                for (int i = 0; i < 2; i++)
+                {
+                    ConsoleKeyInfo UserInput = Console.ReadKey();
+                    if (char.IsDigit(UserInput.KeyChar))
+                    {
+                        piece[i] = int.Parse(UserInput.KeyChar.ToString()); 
+                        Console.Write(" ");
+                    }
+                    else
+                    {
+                        piece[0] = 0;
+                    }
+                }
+                Console.WriteLine(string.Empty);
                 if (map[piece[0], piece[1]] == playerTurn && (map[piece[0] + 1, piece[1]] != playerTurn || map[piece[0] - 1, piece[1]] != playerTurn)) { validPiece = true; break; }
-                Console.WriteLine("Nieprawid³owy wybór pionka, wprowadŸ ponownie: ");
+                { systemMessage = "Nieprawid³owy wybór pionka, wprowadŸ ponownie "; displayMap(); }
             }
             Console.Write("WprowadŸ ruch: ");
             moveCheck();
@@ -193,33 +236,31 @@ namespace WarcabyConsoleApp
             }
         }
         static void Main(string[] args)
-        { 
+        {
+            Console.WriteLine('\t' + "|| WARCABY ||");
+            Console.WriteLine("Jak graæ: W pierwszej kolejnoœci wybierz swój pionek, wpisuj¹c pozycjê na lewej osi (y), póŸniej na górnej (x), po czym wprowadŸ pozycjê na któr¹ chcesz go przenieœæ. Aby zbiæ wrogi pionek, wprowadŸ jego koordynaty. Bicia ³añcuchowe s¹ niedostêpny, bicia obowi¹zkowe s¹ niedostêpne, tworzenie 'damek' jest niedostêpny. Gra koñczy siê gdy któryœ z graczy straci wszystkie pionki. Powodzenia.");
+            Console.ReadKey();
+            Console.Clear();
             initializeMap();
-            map[7, 0] = 0; // test bicia
-            map[7, 1] = 1;
-            map[5, 2] = 2;
+            map[5, 2] = 2; ;// test bicia
             while (!gameEnd)
             {
                 Console.WriteLine('\t'+"|| WARCABY ||");
                 displayMap();
-                Console.WriteLine("Pionki gracza 1: " + playerOnePieces);
-                Console.WriteLine("Pionki gracza 2: " + playerTwoPieces);
                 switch (playerTurn)
                 {
                     case 1:
                         gameProcess();
                         checkGameEnd();
-                        playerTurn = 2;
-                        tura++;
                         break;
                     case 2:
                         gameProcess();
                         checkGameEnd();
-                        playerTurn = 1;
-                        tura++;
                         break;
                 }
             }
+            if(playerOnePieces==0) Console.WriteLine("KONIEC GRY, ZWYCIÊ¯A GRACZ" + 2);
+            else Console.WriteLine("KONIEC GRY, ZWYCIÊ¯A GRACZ" + 1);
         }
     }
 }
